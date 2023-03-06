@@ -19,6 +19,7 @@
     <modules>
         <module>cocoa</module>
         <module>mousse</module>
+        <module>tiramisu</module>
     </modules>
 
     <properties>
