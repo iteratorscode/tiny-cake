@@ -23,6 +23,11 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcProtocol> {
     }
 
     @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.info("有客户端的连接 channel id is: {}", ctx.channel().id());
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol rpcProtocol) throws Exception {
         // 1 接收到数据并处理
         log.info("receive rpc message: {}", rpcProtocol);
@@ -42,8 +47,8 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcProtocol> {
         toClient.setType(ProtocolType.TO_CLIENT.getType());
         toClient.setLength(jsonBytes.length);
         toClient.setData(jsonBytes);
-        log.info("to client message: {}", result);
-        ctx.writeAndFlush(jsonBytes);
+        log.info("to client message: {}", toClient);
+        ctx.writeAndFlush(toClient);
     }
 
     @Override

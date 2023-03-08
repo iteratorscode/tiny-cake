@@ -10,6 +10,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -19,26 +20,28 @@ import java.util.Objects;
  * @since 2023/03/05
  */
 @Component
-public class NettyRpcClient {
+public class NettyRpcClient implements DisposableBean {
 
     private Bootstrap bootstrap;
 
     private Channel channel;
 
-    public void start(String ip, Integer port) throws Exception {
-        EventLoopGroup eventGroup = new NioEventLoopGroup();
-        try {
-            bootstrap = new Bootstrap();
-            bootstrap.group(eventGroup)
-                    .channel(NioSocketChannel.class)
-                    .handler(new RpcClientInitializer());
-            ChannelFuture channelFuture = bootstrap.connect(ip, port).sync();
-            channel = channelFuture.channel();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            eventGroup.shutdownGracefully();
-        }
+    private EventLoopGroup eventGroup;
+
+    public void start(String ip, Integer port, RpcMessage message) throws Exception {
+        eventGroup = new NioEventLoopGroup();
+        bootstrap = new Bootstrap();
+        bootstrap.group(eventGroup)
+                .channel(NioSocketChannel.class)
+                .handler(new RpcClientInitializer());
+        ChannelFuture channelFuture = bootstrap.connect(ip, port).sync();
+        channel = channelFuture.channel();
+        // RpcProtocol rpcProtocol = new RpcProtocol();
+        // rpcProtocol.setType(ProtocolType.TO_SERVER.getType());
+        // byte[] bytes = JSON.toJSONBytes(message);
+        // rpcProtocol.setData(bytes);
+        // rpcProtocol.setLength(bytes.length);
+        // channel.writeAndFlush(rpcProtocol);
     }
 
     public Object send(RpcMessage message) {
@@ -52,5 +55,16 @@ public class NettyRpcClient {
             channel.writeAndFlush(rpcProtocol);
         }
         return null;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        if (Objects.nonNull(channel)) {
+            channel.close();
+        }
+
+        if (Objects.nonNull(eventGroup)) {
+            eventGroup.shutdownGracefully();
+        }
     }
 }

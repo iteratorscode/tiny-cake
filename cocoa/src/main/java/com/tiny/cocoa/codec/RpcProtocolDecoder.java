@@ -29,15 +29,18 @@ public class RpcProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        //在这里调用父类的方法,实现指得到想要的部分,我在这里全部都要,也可以只要body部分
-        in = (ByteBuf) super.decode(ctx, in);
+        log.info("RpcProtocolDecoder#decode start");
+        // //在这里调用父类的方法,实现指得到想要的部分,我在这里全部都要,也可以只要body部分
+        // in = (ByteBuf) super.decode(ctx, in);
+        //
+        // if (in == null) {
+        //     log.info("数据不对");
+        //     return null;
+        // }
 
-        if (in == null) {
-            return null;
-        }
-        if (in.readableBytes() < HEADER_SIZE) {
-            throw new Exception("字节数不足");
-        }
+        // if (in.readableBytes() < HEADER_SIZE) {
+        //     throw new Exception("字节数不足");
+        // }
         //读取type字段
         int type = in.readInt();
 

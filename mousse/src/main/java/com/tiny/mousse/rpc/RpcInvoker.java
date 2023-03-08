@@ -56,7 +56,7 @@ public class RpcInvoker implements InvocationHandler {
 
         // 发送网络请求 ip:port
         NettyRpcClient rpcClient = applicationContext.getBean(NettyRpcClient.class);
-        rpcClient.start(ip, port);
+
 
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setInterfaceName(interfaceName);
@@ -67,6 +67,7 @@ public class RpcInvoker implements InvocationHandler {
         }
         rpcMessage.setArgs(arguments);
         log.info("send to server message: {}", rpcMessage);
+        rpcClient.start(ip, port, rpcMessage);
         rpcClient.send(rpcMessage);
 
         return "class: " + serviceName +

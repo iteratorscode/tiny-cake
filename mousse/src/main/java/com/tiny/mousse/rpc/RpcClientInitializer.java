@@ -20,21 +20,22 @@ public class RpcClientInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
-        //获取到pipeline
+        // 获取到pipeline
         ChannelPipeline pipeline = socketChannel.pipeline();
 
-        //解码器
+
+        // 解码器
         pipeline.addLast("rpcProtocolDecoder", new RpcProtocolDecoder(
                 MAX_FRAME_LENGTH,
                 LENGTH_FIELD_OFFSET,
                 LENGTH_FIELD_LENGTH,
                 LENGTH_ADJUSTMENT,
-                INITIAL_BYTES_TO_STRIP, false));
+                INITIAL_BYTES_TO_STRIP, true));
 
-        //编码器
+        // 编码器
         pipeline.addLast("rpcProtocolEncoder", new RpcProtocolEncoder());
 
-        //加入业务处理的handler
+        // 加入业务处理的handler
         pipeline.addLast("handler", new RpcClientHandler());
     }
 }
