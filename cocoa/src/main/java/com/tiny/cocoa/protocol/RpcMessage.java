@@ -26,5 +26,5 @@ public class RpcMessage {
     /**
      * 参数
      */
-    private Map<String, String> args;
+    private Map<String, Object> args;
 }

@@ -1,5 +1,6 @@
 package com.tiny.mousse.rpc;
 
+import ch.qos.logback.core.joran.util.StringToObjectConverter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
@@ -63,15 +64,17 @@ public class RpcInvoker implements InvocationHandler {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setInterfaceName(interfaceName);
         rpcMessage.setMethodName(methodName);
-        Map<String, String> arguments = new HashMap<>();
+        Map<String, Object> arguments = new HashMap<>();
         for (int i = 0; i < args.length; i++) {
-            arguments.put(String.valueOf(i), JSON.toJSONString(args[i]));
+            arguments.put(String.valueOf(i), args[i]);
         }
         rpcMessage.setArgs(arguments);
         rpcMessage.setMessageId(UUID.randomUUID().toString());
         log.info("send to server message: {}", rpcMessage);
         rpcClient.start(ip, port);
         CompletableFuture<RpcMessage> result = rpcClient.send(rpcMessage);
+        RpcMessage message = result.get();
+        Object resp = message.getArgs().get("resp");
 
         return "class: " + serviceName +
                 " " +
@@ -79,6 +82,6 @@ public class RpcInvoker implements InvocationHandler {
                 " " +
                 "args: " + Arrays.toString(args) +
                 " " +
-                "resp: " + result.get();
+                "resp: " + resp.toString();
     }
 }
