@@ -2,9 +2,16 @@ package com.tiny.mousse.rpc;
 
 import com.tiny.cocoa.codec.RpcProtocolDecoder;
 import com.tiny.cocoa.codec.RpcProtocolEncoder;
+import com.tiny.cocoa.protocol.RpcMessage;
+import com.tiny.cocoa.protocol.RpcProtocol;
+import com.tiny.cocoa.protocol.RpcWaitLock;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * @author iterators
@@ -17,6 +24,12 @@ public class RpcClientInitializer extends ChannelInitializer<SocketChannel> {
     private static final int LENGTH_FIELD_OFFSET = 2;  //长度偏移
     private static final int LENGTH_ADJUSTMENT = 0;
     private static final int INITIAL_BYTES_TO_STRIP = 0;
+
+    private Map<String, RpcWaitLock> results;
+
+    public RpcClientInitializer(Map<String, RpcWaitLock> results) {
+        this.results = results;
+    }
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -36,6 +49,6 @@ public class RpcClientInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("rpcProtocolEncoder", new RpcProtocolEncoder());
 
         // 加入业务处理的handler
-        pipeline.addLast("handler", new RpcClientHandler());
+        pipeline.addLast("handler", new RpcClientHandler(results));
     }
 }

@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author iterators
@@ -66,14 +68,17 @@ public class RpcInvoker implements InvocationHandler {
             arguments.put(String.valueOf(i), JSON.toJSONString(args[i]));
         }
         rpcMessage.setArgs(arguments);
+        rpcMessage.setMessageId(UUID.randomUUID().toString());
         log.info("send to server message: {}", rpcMessage);
-        rpcClient.start(ip, port, rpcMessage);
-        rpcClient.send(rpcMessage);
+        rpcClient.start(ip, port);
+        CompletableFuture<RpcMessage> result = rpcClient.send(rpcMessage);
 
         return "class: " + serviceName +
                 " " +
                 "method: " + method.getName() +
                 " " +
-                "args: " + Arrays.toString(args);
+                "args: " + Arrays.toString(args) +
+                " " +
+                "resp: " + result.get();
     }
 }

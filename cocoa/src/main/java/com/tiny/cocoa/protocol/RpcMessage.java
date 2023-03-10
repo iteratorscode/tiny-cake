@@ -11,6 +11,8 @@ import java.util.Map;
 @Data
 public class RpcMessage {
 
+    private String messageId;
+
     /**
      * 接口名
      */

@@ -23,6 +23,11 @@ public class RpcMessageHandler implements ApplicationContextAware {
         String interfaceName = rpcMessage.getInterfaceName();
         String methodName = rpcMessage.getMethodName();
 
-        return interfaceName + ":" + methodName;
+        RpcMessage message = new RpcMessage();
+        message.setMessageId(rpcMessage.getMessageId());
+        message.setArgs(rpcMessage.getArgs());
+        message.setInterfaceName(interfaceName);
+        message.setMethodName(methodName);
+        return rpcMessage;
     }
 }

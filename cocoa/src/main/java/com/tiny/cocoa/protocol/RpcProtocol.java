@@ -16,7 +16,6 @@ public class RpcProtocol {
 
     private Integer length;
 
-
     private byte[] data;
 
 }
