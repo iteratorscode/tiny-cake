@@ -1,6 +1,8 @@
 package com.tiny.tiramisu.rpc;
 
-import com.tiny.cocoa.protocol.RpcMessage;
+import com.alibaba.fastjson.JSON;
+import com.tiny.cocoa.protocol.RpcRequest;
+import com.tiny.cocoa.protocol.RpcResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -9,8 +11,6 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author iterators
@@ -25,26 +25,23 @@ public class RpcMessageHandler implements ApplicationContextAware {
         this.applicationContext = applicationContext;
     }
 
-    public Object handle(RpcMessage rpcMessage) {
-        String interfaceName = rpcMessage.getInterfaceName();
-        String methodName = rpcMessage.getMethodName();
+    public Object handle(RpcRequest rpcRequest) {
+        String interfaceName = rpcRequest.getInterfaceName();
+        String methodName = rpcRequest.getMethodName();
+        Class<?>[] paramTypes = rpcRequest.getParamTypes();
 
         try {
             Class<?> clazz = Class.forName(interfaceName);
-            Method method = ReflectionUtils.findMethod(clazz, methodName, String.class);
+            Method method = ReflectionUtils.findMethod(clazz, methodName, paramTypes);
             Object bean = applicationContext.getBean(clazz);
-            Map<String, Object> args = rpcMessage.getArgs();
+            Object[] args = rpcRequest.getArgs();
 
-            Object rest = method.invoke(bean, args.get("0"));
+            Object rest = method.invoke(bean, args);
 
-            RpcMessage message = new RpcMessage();
-            message.setMessageId(rpcMessage.getMessageId());
-            Map<String, Object> resp = new HashMap<>();
-            resp.put("resp", rest.toString());
-            message.setArgs(resp);
-            message.setInterfaceName(interfaceName);
-            message.setMethodName(methodName);
-            return message;
+            RpcResponse resp = new RpcResponse();
+            resp.setMessageId(rpcRequest.getMessageId());
+            resp.setData(JSON.toJSONString(rest));
+            return resp;
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {

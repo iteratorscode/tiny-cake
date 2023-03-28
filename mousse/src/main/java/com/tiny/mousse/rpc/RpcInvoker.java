@@ -1,19 +1,16 @@
 package com.tiny.mousse.rpc;
 
-import ch.qos.logback.core.joran.util.StringToObjectConverter;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.tiny.cocoa.protocol.RpcMessage;
+import com.tiny.cocoa.protocol.RpcRequest;
+import com.tiny.cocoa.protocol.RpcResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -61,20 +58,16 @@ public class RpcInvoker implements InvocationHandler {
         NettyRpcClient rpcClient = applicationContext.getBean(NettyRpcClient.class);
 
 
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setInterfaceName(interfaceName);
-        rpcMessage.setMethodName(methodName);
-        Map<String, Object> arguments = new HashMap<>();
-        for (int i = 0; i < args.length; i++) {
-            arguments.put(String.valueOf(i), args[i]);
-        }
-        rpcMessage.setArgs(arguments);
-        rpcMessage.setMessageId(UUID.randomUUID().toString());
-        log.info("send to server message: {}", rpcMessage);
+        RpcRequest rpcRequest = new RpcRequest();
+        rpcRequest.setInterfaceName(interfaceName);
+        rpcRequest.setMethodName(methodName);
+        rpcRequest.setParamTypes(parameterTypes);
+        rpcRequest.setArgs(args);
+        rpcRequest.setMessageId(UUID.randomUUID().toString());
+        log.info("send to server message: {}", rpcRequest);
         rpcClient.start(ip, port);
-        CompletableFuture<RpcMessage> result = rpcClient.send(rpcMessage);
-        RpcMessage message = result.get();
-        Object resp = message.getArgs().get("resp");
+        CompletableFuture<RpcResponse> result = rpcClient.send(rpcRequest);
+        RpcResponse message = result.get();
 
         return "class: " + serviceName +
                 " " +
@@ -82,6 +75,6 @@ public class RpcInvoker implements InvocationHandler {
                 " " +
                 "args: " + Arrays.toString(args) +
                 " " +
-                "resp: " + resp.toString();
+                "resp: " + message.toString();
     }
 }

@@ -2,8 +2,8 @@ package com.tiny.tiramisu.rpc;
 
 import com.alibaba.fastjson.JSON;
 import com.tiny.cocoa.protocol.ProtocolType;
-import com.tiny.cocoa.protocol.RpcMessage;
 import com.tiny.cocoa.protocol.RpcProtocol;
+import com.tiny.cocoa.protocol.RpcRequest;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcProtocol> {
         log.info("receive rpc message: {}", rpcProtocol);
 
         byte[] data = rpcProtocol.getData();
-        RpcMessage message = JSON.parseObject(data, RpcMessage.class);
+        RpcRequest message = JSON.parseObject(data, RpcRequest.class);
         log.info("receive message: {}", message);
 
         // 2 处理消息

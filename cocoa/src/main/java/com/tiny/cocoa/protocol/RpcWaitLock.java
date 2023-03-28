@@ -17,5 +17,5 @@ public class RpcWaitLock {
         this.countDownLatch = countDownLatch;
     }
 
-    private RpcMessage resp;
+    private RpcResponse resp;
 }
